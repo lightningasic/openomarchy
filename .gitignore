@@ -1,0 +1,7 @@
+# LibreOffice 锁文件与备份
+.~lock.*
+*.backup.*
+
+# 系统垃圾
+.DS_Store
+Thumbs.db

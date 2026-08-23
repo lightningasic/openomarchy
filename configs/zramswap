@@ -1,0 +1,4 @@
+# Open Omarchy ZRAM 配置 (zram-tools / /etc/default/zramswap)
+# 压缩算法 zstd; 交换分区为物理内存的 50%
+ALGO=zstd
+PERCENT=50

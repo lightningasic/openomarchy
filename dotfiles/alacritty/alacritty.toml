@@ -1,0 +1,9 @@
+# Open Omarchy Alacritty 配置
+[window]
+opacity = 0.95
+
+[font]
+size = 12
+
+[colors]
+primary = { background = "#1e1e2e", foreground = "#cdd6f4" }
