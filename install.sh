@@ -71,11 +71,13 @@ check_root() {
     fi
 }
 
-# 检查网络连接
+# 检查网络连接 (ICMP 常被防火墙拦截, ping 失败时用 HTTPS 复核)
 check_network() {
     print_info "检查网络连接..."
     if ping -c 1 -W 2 8.8.8.8 &> /dev/null; then
         print_success "网络连接正常"
+    elif curl -sI --max-time 5 https://github.com &> /dev/null; then
+        print_warning "ping 不通但 HTTPS 可用（防火墙拦截 ICMP），继续安装"
     else
         print_error "网络连接失败，请检查网络后重试"
         exit 1
@@ -149,24 +151,24 @@ select_custom_modules() {
     fi
 }
 
-# 执行模块
+# 执行模块 (容错: 单个模块失败记录后继续, 结束时统一汇报)
 run_modules() {
     print_header "开始安装 Open Omarchy"
-    
+    FAILED_MODULES=""
+
     for module in $SELECTED_MODULES; do
         MODULE_FILE="$MODULES_DIR/$module.sh"
-        if [ -f "$MODULE_FILE" ]; then
-            print_info "执行模块: $module"
-            bash "$MODULE_FILE"
-            if [ $? -eq 0 ]; then
-                print_success "模块 $module 完成"
-            else
-                print_error "模块 $module 执行失败"
-                exit 1
-            fi
-        else
+        if [ ! -f "$MODULE_FILE" ]; then
             print_error "找不到模块文件: $MODULE_FILE"
             exit 1
+        fi
+        print_info "执行模块: $module"
+        # 子 shell 运行, 避免 set -e 在模块内部直接终止整个安装器
+        if bash "$MODULE_FILE"; then
+            print_success "模块 $module 完成"
+        else
+            print_error "模块 $module 存在失败项（详见上方日志）"
+            FAILED_MODULES="$FAILED_MODULES $module"
         fi
     done
 }
@@ -180,10 +182,14 @@ show_complete() {
     for module in $SELECTED_MODULES; do
         echo "  ✅ $module"
     done
+    if [ -n "$FAILED_MODULES" ]; then
+        echo ""
+        print_warning "以下模块存在失败项，请回看上方日志后重试:$FAILED_MODULES"
+    fi
     echo ""
     echo "💡 建议："
     echo "  1. 重启系统使所有更改生效: sudo reboot"
-    echo "  2. 如果安装了 Neovim，首次启动会自动安装插件"
+    echo "  2. Neovim 当前为基础配置，插件体系将在后续版本引入"
     echo "  3. 查看文档: https://github.com/lightningasic/openomarchy"
     echo ""
     echo "🐛 遇到问题？请提交 Issue:"
