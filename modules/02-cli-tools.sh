@@ -42,12 +42,18 @@ fi
 if command -v eza >/dev/null 2>&1; then
     ok "eza 已存在"
 else
-    step "[02-cli-tools] 安装 eza (官方 deb)..."
-    if wget -qO /tmp/eza.deb "https://github.com/eza-community/eza/releases/latest/download/eza_x86_64-unknown-linux-gnu.deb"; then
-        $SUDO dpkg -i /tmp/eza.deb >/dev/null || $SUDO apt-get install -f -y \
-            || record_fail "安装 eza"
+    step "[02-cli-tools] 安装 eza..."
+    # 优先发行版仓库 (Fedora/Arch 等已收录)
+    if pkg_install eza >/dev/null 2>&1 && command -v eza >/dev/null 2>&1; then
+        ok "eza 已通过包管理器安装"
     else
-        record_fail "下载 eza deb"
+        # 回退: GitHub 官方静态二进制 (全发行版通用)
+        if curl -fsSL "https://github.com/eza-community/eza/releases/latest/download/eza_x86_64-unknown-linux-gnu.tar.gz" \
+            | tar xz -C /tmp 2>/dev/null && [ -f /tmp/eza ]; then
+            $SUDO install /tmp/eza /usr/local/bin/eza && ok "eza 二进制已安装"
+        else
+            record_fail "安装 eza (仓库与二进制均失败)"
+        fi
     fi
 fi
 

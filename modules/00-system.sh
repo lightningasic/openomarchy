@@ -15,6 +15,13 @@ pkg_install curl wget git vim htop build-essential software-properties-common \
     apt-transport-https ca-certificates gnupg lsb-release unzip zsh \
     || record_fail "基础依赖安装"
 
+# RHEL/CentOS 需要 EPEL 才能安装 fzf/btop 等工具
+case "$DISTRO_ID" in
+    rhel|centos)
+        pkg_install epel-release || record_fail "启用 EPEL 仓库"
+        ;;
+esac
+
 # Neovim 官方稳定版 PPA (Ubuntu/Mint/Pop 专属)
 case "$DISTRO_ID" in
     ubuntu|linuxmint|pop)

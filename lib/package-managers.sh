@@ -27,11 +27,14 @@ map_pkg() {
         pacman:fd-find)                 echo "fd" ;;
         pacman:tldr)                    echo "tealdeer" ;;
         pacman:zram-tools)              echo "zram-generator" ;;
+        pacman:epel-release)            echo "" ;;
         # ---- SUSE 系 ----
         zypper:build-essential)         echo "gcc gcc-c++ make" ;;
         zypper:software-properties-common|zypper:apt-transport-https|zypper:lsb-release|zypper:python3-venv)
                                         echo "" ;;
         zypper:gnupg)                   echo "gpg2" ;;
+        zypper:epel-release)            echo "" ;;
+        zypper:zram-tools)              echo "zram-generator" ;;
         # ---- 兜底: 同名 ----
         *) echo "$p" ;;
     esac

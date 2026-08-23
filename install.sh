@@ -39,6 +39,23 @@ print_header() {
     echo "========================================="
 }
 
+# ---- 非交互支持: ./install.sh [full|dev|dotfiles|custom] [-y] 或 OPENOMARCHY_YES=1 ----
+ASSUME_YES="${OPENOMARCHY_YES:-0}"
+MODE_ARG=""
+for arg in "$@"; do
+    case "$arg" in
+        -y|--yes) ASSUME_YES=1 ;;
+        *) MODE_ARG="$arg" ;;
+    esac
+done
+
+confirm() {
+    [ "$ASSUME_YES" = "1" ] && return 0
+    local reply
+    read -p "$1" reply
+    [[ "$reply" =~ ^[Yy]$ ]]
+}
+
 # 检测发行版
 detect_distro() {
     print_info "检测系统发行版..."
@@ -62,12 +79,12 @@ detect_distro() {
 # 检查是否以 root 运行
 check_root() {
     if [ "$EUID" -eq 0 ]; then
-        print_warning "检测到以 root 用户运行，建议使用普通用户（有 sudo 权限）执行"
-        read -p "是否继续？(y/N) " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            exit 1
+        if [ "$ASSUME_YES" = "1" ]; then
+            print_warning "以 root 运行（容器环境，自动继续）"
+            return
         fi
+        print_warning "检测到以 root 用户运行，建议使用普通用户（有 sudo 权限）执行"
+        confirm "是否继续？(y/N) " || exit 1
     fi
 }
 
@@ -100,8 +117,20 @@ show_welcome() {
     echo ""
 }
 
-# 选择安装模式
+# 选择安装模式 (支持参数预设: full|dev|dotfiles; custom 仅交互式)
 select_install_mode() {
+    if [ -n "$MODE_ARG" ]; then
+        case "$MODE_ARG" in
+            full)     SELECTED_MODULES="00-system 01-zram 02-cli-tools 03-dev-tools 04-apps 05-dotfiles" ;;
+            dev)      SELECTED_MODULES="00-system 02-cli-tools 03-dev-tools" ;;
+            dotfiles) SELECTED_MODULES="00-system 05-dotfiles" ;;
+            custom)   print_error "自定义模式仅支持交互式选择"; exit 1 ;;
+            *) print_error "未知模式: $MODE_ARG (可用: full|dev|dotfiles|custom)"; exit 1 ;;
+        esac
+        print_info "已通过参数选择模式: $MODE_ARG"
+        return
+    fi
+
     echo "请选择安装模式："
     echo "  1) 完整安装（推荐）- 安装所有工具和配置"
     echo "  2) 仅开发工具 - 安装 CLI 工具和开发环境"
@@ -109,7 +138,7 @@ select_install_mode() {
     echo "  4) 自定义 - 手动选择要安装的模块"
     echo ""
     read -p "请输入选项 [1-4]: " MODE
-    
+
     case $MODE in
         1) SELECTED_MODULES="00-system 01-zram 02-cli-tools 03-dev-tools 04-apps 05-dotfiles" ;;
         2) SELECTED_MODULES="00-system 02-cli-tools 03-dev-tools" ;;
@@ -129,9 +158,10 @@ select_custom_modules() {
     echo "  d) 开发工具 (Neovim, Docker, Node.js)"
     echo "  e) 日常应用 (Brave, OnlyOffice, Obsidian)"
     echo "  f) 配置文件 (dotfiles)"
+    echo "  g) Hyprland 可选轻量模式 (实验性)"
     echo ""
     read -p "请输入要安装的模块 (如: a b c): " INPUT
-    
+
     SELECTED_MODULES=""
     for m in $INPUT; do
         case $m in
@@ -141,6 +171,7 @@ select_custom_modules() {
             d) SELECTED_MODULES="$SELECTED_MODULES 03-dev-tools" ;;
             e) SELECTED_MODULES="$SELECTED_MODULES 04-apps" ;;
             f) SELECTED_MODULES="$SELECTED_MODULES 05-dotfiles" ;;
+            g) SELECTED_MODULES="$SELECTED_MODULES 06-hyprland" ;;
             *) print_warning "忽略未知选项: $m" ;;
         esac
     done
@@ -207,13 +238,11 @@ main() {
     
     echo ""
     print_warning "即将安装以下模块: $SELECTED_MODULES"
-    read -p "是否继续？(y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    if ! confirm "是否继续？(y/N) "; then
         echo "已取消安装"
         exit 0
     fi
-    
+
     run_modules
     show_complete
 }

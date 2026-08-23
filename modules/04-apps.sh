@@ -7,30 +7,55 @@ source "$MOD_DIR/../lib/detect.sh"
 
 install_brave() {
     command -v brave-browser >/dev/null 2>&1 && { ok "Brave 已存在"; return 0; }
-    step "[04-apps] 安装 Brave 浏览器 (官方 apt 源)..."
-    curl -fsSL https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg \
-        | $SUDO dd of=/usr/share/keyrings/brave-browser-archive-keyring.gpg 2>/dev/null \
-        || { record_fail "下载 Brave 签名密钥"; return 1; }
-    echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" \
-        | $SUDO tee /etc/apt/sources.list.d/brave-browser-release.list > /dev/null \
-        || { record_fail "写入 Brave 源"; return 1; }
-    pkg_update && pkg_install brave-browser || record_fail "安装 brave-browser"
+    case "$DISTRO_ID" in
+        ubuntu|linuxmint|debian|pop)
+            step "[04-apps] 安装 Brave 浏览器 (官方 apt 源)..."
+            curl -fsSL https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg \
+                | $SUDO dd of=/usr/share/keyrings/brave-browser-archive-keyring.gpg 2>/dev/null \
+                || { record_fail "下载 Brave 签名密钥"; return 1; }
+            echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" \
+                | $SUDO tee /etc/apt/sources.list.d/brave-browser-release.list > /dev/null \
+                || { record_fail "写入 Brave 源"; return 1; }
+            pkg_update && pkg_install brave-browser || record_fail "安装 brave-browser"
+            ;;
+        fedora|rhel|centos)
+            step "[04-apps] 安装 Brave 浏览器 (官方 RPM 源)..."
+            $SUDO dnf install -y dnf-plugins-core \
+                && $SUDO dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo \
+                && curl -fsSL https://brave-browser-rpm-release.s3.brave.com/brave-core.asc | $SUDO rpm --import - \
+                && pkg_install brave-browser \
+                || record_fail "安装 brave-browser (RPM 源)"
+            ;;
+        *)
+            warn "Brave 在此发行版需 AUR/OBS 等第三方源, 已跳过 (可改用 Firefox 或 Flatpak)"
+            ;;
+    esac
 }
 
 install_obsidian() {
     command -v obsidian >/dev/null 2>&1 && { ok "Obsidian 已存在"; return 0; }
-    step "[04-apps] 安装 Obsidian (官方 deb 最新版)..."
-    local url
-    url="$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest \
-        | grep -o 'https://[^"]*amd64\.deb' | head -n1)"
-    if [ -n "$url" ]; then
-        wget -qO /tmp/obsidian.deb "$url" \
-            && $SUDO apt-get install -y /tmp/obsidian.deb \
-            && ok "Obsidian 已安装" \
-            || record_fail "安装 Obsidian"
-    else
-        record_fail "获取 Obsidian 下载地址 (GitHub API 限流?)"
-    fi
+    case "$DISTRO_ID" in
+        ubuntu|linuxmint|debian|pop)
+            step "[04-apps] 安装 Obsidian (官方 deb 最新版)..."
+            local url
+            url="$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest \
+                | grep -o 'https://[^"]*amd64\.deb' | head -n1)"
+            if [ -n "$url" ]; then
+                wget -qO /tmp/obsidian.deb "$url" \
+                    && $SUDO apt-get install -y /tmp/obsidian.deb \
+                    && ok "Obsidian 已安装" \
+                    || record_fail "安装 Obsidian"
+            else
+                record_fail "获取 Obsidian 下载地址 (GitHub API 限流?)"
+            fi
+            ;;
+        *)
+            step "[04-apps] 通过 Flatpak 安装 Obsidian..."
+            ensure_flatpak || return 1
+            flatpak install -y --noninteractive flathub md.obsidian.Obsidian \
+                || record_fail "安装 Obsidian (Flatpak)"
+            ;;
+    esac
 }
 
 ensure_flatpak() {

@@ -37,10 +37,10 @@ Omarchy is brilliant in its software selection and system optimisation, but its 
 
 | Family | Distributions | Status |
 | - | - | - |
-| **Debian** | Debian 11+, Ubuntu 20.04+, Linux Mint 21+, Pop!\_OS | Phase 1: fully implemented |
-| **Red Hat** | Fedora 38+, RHEL 9+, CentOS Stream 9+ | Roadmap (Phase 2) |
-| **Arch** | Arch Linux, Manjaro, EndeavourOS, Garuda | Roadmap |
-| **SUSE** | openSUSE Leap 15.4+, Tumbleweed | Roadmap |
+| **Debian** | Debian 11+, Ubuntu 20.04+, Linux Mint 21+, Pop!\_OS | Implemented |
+| **Red Hat** | Fedora 38+, RHEL 9+, CentOS Stream 9+ | Implemented |
+| **Arch** | Arch Linux, Manjaro, EndeavourOS, Garuda | Implemented |
+| **SUSE** | openSUSE Leap 15.4+, Tumbleweed | Implemented |
 
 ### Quick Start
 
@@ -48,7 +48,8 @@ Omarchy is brilliant in its software selection and system optimisation, but its 
 git clone https://github.com/lightningasic/openomarchy.git
 cd openomarchy
 chmod +x install.sh
-./install.sh
+./install.sh            # interactive
+./install.sh dev -y     # non-interactive (also: OPENOMARCHY_YES=1)
 ```
 
 The installer detects your distribution and offers four modes:
@@ -73,7 +74,7 @@ openomarchy/
 ├── lib/                    # Distribution adapters
 │   ├── detect.sh           # OS detection + logging/failure tracking
 │   └── package-managers.sh # Generic package name -> apt/dnf/pacman/zypper
-├── configs/                # System config templates (zramswap, sysctl)
+├── configs/                # System templates (zramswap/sysctl/Hyprland)
 ├── dotfiles/               # Pre-configured user configs
 ├── README.md
 └── LICENSE
@@ -88,11 +89,11 @@ openomarchy/
 
 - [x] Core concept & design
 - [x] Linux Mint / Ubuntu implementation
-- [ ] Add Fedora / RHEL support
-- [ ] Add Arch / Manjaro support
-- [ ] Add openSUSE support
+- [x] Add Fedora / RHEL support
+- [x] Add Arch / Manjaro support
+- [x] Add openSUSE support
 - [ ] NixOS flake integration
-- [ ] Optional Hyprland mode
+- [x] Optional Hyprland mode (experimental)
 - [ ] Graphical installer (optional)
 - [ ] User-contributed dotfiles repository
 
@@ -141,10 +142,10 @@ Omarchy 在软件选型和系统优化上非常出色，但其极端的"键盘�
 
 | 家族 | 具体发行版 | 状态 |
 | - | - | - |
-| **Debian 系** | Debian 11+、Ubuntu 20.04+、Linux Mint 21+、Pop!\_OS | 第一阶段：完整实现 |
-| **Red Hat 系** | Fedora 38+、RHEL 9+、CentOS Stream 9+ | 路线图（第二阶段） |
-| **Arch 系** | Arch Linux、Manjaro、EndeavourOS、Garuda | 路线图 |
-| **SUSE 系** | openSUSE Leap 15.4+、Tumbleweed | 路线图 |
+| **Debian 系** | Debian 11+、Ubuntu 20.04+、Linux Mint 21+、Pop!\_OS | 已实现 |
+| **Red Hat 系** | Fedora 38+、RHEL 9+、CentOS Stream 9+ | 已实现 |
+| **Arch 系** | Arch Linux、Manjaro、EndeavourOS、Garuda | 已实现 |
+| **SUSE 系** | openSUSE Leap 15.4+、Tumbleweed | 已实现 |
 
 ### 快速开始
 
@@ -152,7 +153,8 @@ Omarchy 在软件选型和系统优化上非常出色，但其极端的"键盘�
 git clone https://github.com/lightningasic/openomarchy.git
 cd openomarchy
 chmod +x install.sh
-./install.sh
+./install.sh            # 交互式
+./install.sh dev -y     # 非交互式（或 OPENOMARCHY_YES=1）
 ```
 
 安装程序会自动检测你的发行版，并提供四种安装模式：
@@ -177,7 +179,7 @@ openomarchy/
 ├── lib/                    # 发行版适配层
 │   ├── detect.sh           # 发行版检测 + 日志/失败记录
 │   └── package-managers.sh # 通用包名 → apt/dnf/pacman/zypper 翻译
-├── configs/                # 系统配置模板（zramswap、sysctl）
+├── configs/                # 系统模板（zramswap/sysctl/Hyprland）
 ├── dotfiles/               # 预置的用户配置
 ├── README.md
 └── LICENSE
@@ -192,11 +194,11 @@ openomarchy/
 
 - [x] 核心理念与设计
 - [x] Linux Mint / Ubuntu 实现
-- [ ] 增加 Fedora / RHEL 支持
-- [ ] 增加 Arch / Manjaro 支持
-- [ ] 增加 openSUSE 支持
+- [x] 增加 Fedora / RHEL 支持
+- [x] 增加 Arch / Manjaro 支持
+- [x] 增加 openSUSE 支持
 - [ ] NixOS flake 集成
-- [ ] 可选 Hyprland 模式
+- [x] 可选 Hyprland 模式（实验性）
 - [ ] 图形化安装界面（可选）
 - [ ] 社区贡献的 dotfiles 仓库
 

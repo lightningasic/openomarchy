@@ -9,6 +9,8 @@ pkg_install neovim python3-pip python3-venv || record_fail "Neovim 安装"
 
 if command -v lazygit >/dev/null 2>&1; then
     ok "Lazygit 已存在"
+elif pkg_install lazygit >/dev/null 2>&1 && command -v lazygit >/dev/null 2>&1; then
+    ok "Lazygit 已通过包管理器安装"   # Fedora 39+ / Arch 等
 else
     step "[03-dev-tools] 安装 Lazygit (最新版二进制)..."
     LAZYGIT_VERSION="$(curl -s https://api.github.com/repos/jesseduffield/lazygit/releases/latest \
@@ -53,7 +55,10 @@ fi
 step "[03-dev-tools] 安装 GitHub CLI..."
 if command -v gh >/dev/null 2>&1; then
     ok "gh 已存在"
+elif pkg_install gh >/dev/null 2>&1 && command -v gh >/dev/null 2>&1; then
+    ok "gh 已通过包管理器安装"   # Fedora / Arch / openSUSE 均已收录
 elif require_family debian; then
+    # Debian 系老版本仓库缺 gh → 官方 apt 源回退
     if curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
         | $SUDO dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg 2>/dev/null; then
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
