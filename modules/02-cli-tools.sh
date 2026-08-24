@@ -61,7 +61,8 @@ if command -v starship >/dev/null 2>&1; then
     ok "starship 已存在"
 else
     step "[02-cli-tools] 安装 starship..."
-    curl -sS https://starship.rs/install.sh | sh -s -- -y \
+    mkdir -p "$HOME/.local/bin"
+    curl -sS https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin" \
         || record_fail "安装 starship"
 fi
 

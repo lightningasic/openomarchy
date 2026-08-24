@@ -52,7 +52,7 @@ install_obsidian() {
         *)
             step "[04-apps] 通过 Flatpak 安装 Obsidian..."
             ensure_flatpak || return 1
-            flatpak install -y --noninteractive flathub md.obsidian.Obsidian \
+            $SUDO flatpak install -y --noninteractive flathub md.obsidian.Obsidian \
                 || record_fail "安装 Obsidian (Flatpak)"
             ;;
     esac
@@ -71,9 +71,9 @@ if require_family debian; then
 
     step "[04-apps] 通过 Flatpak 安装 OnlyOffice + Spotify..."
     if ensure_flatpak; then
-        flatpak install -y --noninteractive flathub org.onlyoffice.desktopeditors \
+        $SUDO flatpak install -y --noninteractive flathub org.onlyoffice.desktopeditors \
             || record_fail "安装 OnlyOffice"
-        flatpak install -y --noninteractive flathub com.spotify.Client \
+        $SUDO flatpak install -y --noninteractive flathub com.spotify.Client \
             || record_fail "安装 Spotify"
         warn "Flatpak 应用首次出现在应用菜单可能需要注销/重启桌面"
     fi

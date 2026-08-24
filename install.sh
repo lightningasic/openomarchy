@@ -103,7 +103,7 @@ check_network() {
 
 # 显示欢迎信息
 show_welcome() {
-    clear
+    clear 2>/dev/null || true
     echo "╔═══════════════════════════════════════════╗"
     echo "║                                         ║"
     echo "║     Open Omarchy 一键安装脚本 v1.0      ║"

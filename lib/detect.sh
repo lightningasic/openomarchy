@@ -82,3 +82,9 @@ detect_distro() {
 
     ok "检测到: $DISTRO_NAME ($DISTRO_ID), 包管理器: $PKG_MANAGER"
 }
+
+# PATCH: sourced 时自动执行发行版检测
+if [ -z "${__OMARCHY_DETECTED:-}" ]; then
+  __OMARCHY_DETECTED=1
+  detect_distro
+fi
